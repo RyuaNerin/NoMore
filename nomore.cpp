@@ -37,7 +37,7 @@ DWORD WINAPI noMore(LPVOID lpThreadParameter)
 
         while (true)
         {
-            hwnd = FindWindowExW(NULL, hwnd, NULL, L"FFXIVGAME");
+            hwnd = FindWindowExW(NULL, hwnd, L"FFXIVGAME", NULL);
             if (hwnd == NULL)
                 break;
 
