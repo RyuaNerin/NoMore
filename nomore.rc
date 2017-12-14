@@ -1,0 +1,39 @@
+#include "resource.h"
+
+IDI_ICON  ICON    "nomore.ico"
+
+1 VERSIONINFO
+ FILEVERSION NOMORE_VERSION
+ PRODUCTVERSION NOMORE_VERSION
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "04000412"
+        BEGIN
+            VALUE "InternalName",       "NoMore.exe"
+            VALUE "OriginalFilename",   "NoMore.exe"
+            VALUE "ProductName",        "NoMore"
+
+            VALUE "FileDescription", "No More AFK"
+
+            VALUE "CompanyName",    "RyuaNerin"
+            VALUE "LegalCopyright", "Copyright (C) 2016, RyuaNerin."
+
+            VALUE "FileVersion",    NOMORE_VERSION_STR
+            VALUE "ProductVersion", NOMORE_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x412, 1200
+    END
+END
