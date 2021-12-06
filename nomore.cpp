@@ -41,10 +41,12 @@ DWORD WINAPI noMore(LPVOID lpThreadParameter)
             if (hwnd == NULL)
                 break;
 
-            PostMessageW(hwnd, WM_KEYDOWN, VK_F24, 0);
+            PostMessageW(hwnd, WM_KEYDOWN, VK_MENU, 0);
+            Sleep(10);
+            PostMessageW(hwnd, WM_KEYUP, VK_MENU, 0);
         };
 
-        Sleep(60 * 1000);
+        Sleep(5 * 60 * 1000);
     } while (true);
 }
 
@@ -88,9 +90,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     nid.uFlags           = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     nid.hIcon            = LoadIconW(hInstance, MAKEINTRESOURCEW(IDI_ICON));
     nid.uCallbackMessage = NOMORE_WM_SHELLICON;
-    wcscpy_s(nid.szTip,       ARRAYSIZE(nid.szTip), NOMORE_TIP);
-    wcscpy_s(nid.szInfoTitle, ARRAYSIZE(nid.szTip), NOMORE_INFOTITLE);
-    wcscpy_s(nid.szInfo,      ARRAYSIZE(nid.szTip), NOMORE_INFO);
+    wcscpy_s(nid.szTip,       ARRAYSIZE(nid.szTip      ), NOMORE_TIP);
+    wcscpy_s(nid.szInfoTitle, ARRAYSIZE(nid.szInfoTitle), NOMORE_INFOTITLE);
+    wcscpy_s(nid.szInfo,      ARRAYSIZE(nid.szInfo     ), NOMORE_INFO);
 
     Shell_NotifyIconW(NIM_ADD, &nid);
 #pragma endregion
@@ -101,6 +103,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     
     DWORD dwThreadId;
     auto hThread = CreateThread(NULL, 0, &noMore, NULL, 0, &dwThreadId);
+    if (hThread == 0)
+    {
+        return 1;
+    }
     
     MSG msg;
     while (GetMessageW(&msg, NULL, 0, 0))
