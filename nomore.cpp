@@ -56,10 +56,12 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
             if (hwnd == NULL)
                 break;
 
+            /*
             if (hwnd == GetForegroundWindow())
             {
                 continue;
             }
+            */
 
             PostMessageW(hwnd, WM_KEYDOWN, NOMORE_KEY, 0);
             Sleep(10);
