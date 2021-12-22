@@ -12,7 +12,7 @@ IDI_ICON  ICON    "nomore.ico"
  FILEFLAGS 0x0L
 #endif
  FILEOS 0x40004L
- FILETYPE 0x1L
+ FILETYPE 0x2L
  FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
@@ -26,7 +26,7 @@ BEGIN
             VALUE "FileDescription", "No More AFK"
 
             VALUE "CompanyName",    "RyuaNerin"
-            VALUE "LegalCopyright", "Copyright (C) 2016, RyuaNerin."
+            VALUE "LegalCopyright", "Copyright (C) 2016 - 2021, RyuaNerin."
 
             VALUE "FileVersion",    NOMORE_VERSION_STR
             VALUE "ProductVersion", NOMORE_VERSION_STR
@@ -34,6 +34,6 @@ BEGIN
     END
     BLOCK "VarFileInfo"
     BEGIN
-        VALUE "Translation", 0x412, 1200
+        VALUE "Translation", 0x400, 1042
     END
 END

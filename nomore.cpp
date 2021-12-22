@@ -11,11 +11,11 @@
 
 #include "resource.h"
 
-#pragma comment(lib, "jsoncpp.lib")
 #pragma comment(lib, "Winhttp.lib")
 
 #define NOMORE_CLASSNAME        L"NoMore"
 #define	NOMORE_WM_SHELLICON     WM_USER + 1
+#define NOMORE_WM_TIMER         10000
 
 #define NOMORE_MENU_ABOUT       10000
 #define NOMORE_MENU_EXIT        10001
@@ -24,16 +24,31 @@
 #define NOMORE_INFOTITLE        L"NoMore"
 #define NOMORE_INFO             L"NoMore is running."
 
+#define NOMORE_ELAPSE                3 * 1000
+#define NOMORE_ELAPSE_LONG      5 * 60 * 1000
+
+#define NOMORE_KEY              VK_LCONTROL
+
 NOTIFYICONDATAW nid = { 0, };
 HMENU hMenu;
+UINT_PTR hTimer = NULL;
 
-DWORD WINAPI noMore(LPVOID lpThreadParameter)
+bool checkLatestRelease();
+LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+inline void NoMoreInsertMenu(HMENU hMenu, UINT uMenuIndex, UINT uidCmd, LPCWSTR dwTypedata);
+
+void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
 {
-    HWND hwnd;
-
-    do
+    if (nIDEvent == NOMORE_WM_TIMER)
     {
-        hwnd = NULL;
+        if (hTimer != NULL)
+        {
+            KillTimer(hWnd, hTimer);
+            SetTimer(hWnd, NOMORE_WM_TIMER, NOMORE_ELAPSE_LONG, noMore);
+            hTimer = NULL;
+        }
+
+        HWND hwnd = NULL;
 
         while (true)
         {
@@ -41,18 +56,17 @@ DWORD WINAPI noMore(LPVOID lpThreadParameter)
             if (hwnd == NULL)
                 break;
 
-            PostMessageW(hwnd, WM_KEYDOWN, VK_MENU, 0);
+            if (hwnd == GetForegroundWindow())
+            {
+                continue;
+            }
+
+            PostMessageW(hwnd, WM_KEYDOWN, NOMORE_KEY, 0);
             Sleep(10);
-            PostMessageW(hwnd, WM_KEYUP, VK_MENU, 0);
+            PostMessageW(hwnd, WM_KEYUP, NOMORE_KEY, 0);
         };
-
-        Sleep(5 * 60 * 1000);
-    } while (true);
+    }
 }
-
-bool checkLatestRelease();
-LRESULT CALLBACK WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-void NoMoreInsertMenu(HMENU hMenu, UINT uMenuIndex, UINT uidCmd, LPCWSTR dwTypedata);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int cmdShow)
 {
@@ -101,12 +115,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
     NoMoreInsertMenu(hMenu, 0, NOMORE_MENU_ABOUT, L"By RyuaNerin");
     NoMoreInsertMenu(hMenu, 1, NOMORE_MENU_EXIT, L"Exit");
     
-    DWORD dwThreadId;
-    auto hThread = CreateThread(NULL, 0, &noMore, NULL, 0, &dwThreadId);
-    if (hThread == 0)
-    {
-        return 1;
-    }
+    hTimer = SetTimer(hWnd, NOMORE_WM_TIMER, NOMORE_ELAPSE, noMore);
     
     MSG msg;
     while (GetMessageW(&msg, NULL, 0, 0))
@@ -115,13 +124,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
         DispatchMessageW(&msg);
     }
 
-    TerminateThread(hThread, 0);
-    CloseHandle(hThread);
-
     return 0;
 }
 
-void NoMoreInsertMenu(HMENU hMenu, UINT uMenuIndex, UINT uidCmd, LPCWSTR dwTypedata)
+inline void NoMoreInsertMenu(HMENU hMenu, UINT uMenuIndex, UINT uidCmd, LPCWSTR dwTypedata)
 {
     MENUITEMINFOW mii = { 0, };
     mii.cbSize = sizeof(mii);
@@ -249,12 +255,13 @@ bool checkLatestRelease()
     std::string body;
     if (getHttp(L"api.github.com", L"/repos/RyuaNerin/NoMore/releases/latest", body))
     {
-        Json::Reader jsonReader;
-        Json::Value json;
+        Json::CharReaderBuilder                 jo_r_builder;
+        const std::unique_ptr<Json::CharReader> jo_r(jo_r_builder.newCharReader());
+        Json::Value                             jo;
 
-        if (jsonReader.parse(body, json))
+        if (jo_r->parse(body.c_str(), body.c_str() + body.size(), &jo, nullptr))
         {
-            std::string tag_name = json["tag_name"].asString();
+            std::string tag_name = jo["tag_name"].asString();
             return (tag_name.compare(NOMORE_VERSION_STR) == 0);
         }
     }

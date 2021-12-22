@@ -5,7 +5,7 @@
 
 #define IDI_ICON    1
 
-#define NOMORE_VERSION       0,0,0,2
-#define NOMORE_VERSION_STR  "0.0.0.2"
+#define NOMORE_VERSION       0,0,0,3
+#define NOMORE_VERSION_STR  "0.0.0.3"
 
 #endif
