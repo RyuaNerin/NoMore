@@ -23,7 +23,7 @@
 #define NOMORE_TIP              L"NoMore"
 #define NOMORE_INFOTITLE        L"NoMore"
 #define NOMORE_INFO             L"NoMore is running."
-#define NOMORE_MUTEX            L"NoMore_Mutex"
+#define NOMORE_MUTEX            L"Global\\NoMore_Mutex"
 
 #define NOMORE_ELAPSE            3 * 1000
 #define NOMORE_ELAPSE_LONG      60 * 1000
@@ -49,6 +49,8 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
             hTimer = NULL;
         }
 
+        HWND hwnd_foreground = GetForegroundWindow();
+
         HWND hwnd = NULL;
 
         LASTINPUTINFO lii = { 0 , };
@@ -62,7 +64,7 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
 
             lii.dwTime = 0;
             if (
-                hwnd == GetForegroundWindow() ||
+                hwnd != hwnd_foreground ||
                 (
                     GetLastInputInfo(&lii) != 0 &&
                     (GetTickCount64() - lii.dwTime) > NOMORE_ELAPSE_LONG
@@ -70,7 +72,7 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
             )
             {
                 PostMessageW(hwnd, WM_KEYDOWN, NOMORE_KEY, 0);
-                Sleep(10);
+                Sleep(100);
                 PostMessageW(hwnd, WM_KEYUP, NOMORE_KEY, 0);
             }
         };
