@@ -81,7 +81,7 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int cmdShow)
 {
-    if (CreateMutexW(NULL, FALSE, NOMORE_MUTEX) == NULL && GetLastError() == ERROR_ALREADY_EXISTS)
+    if (CreateMutexW(NULL, FALSE, NOMORE_MUTEX) == NULL || GetLastError() == ERROR_ALREADY_EXISTS)
     {
         return 0;
     }
