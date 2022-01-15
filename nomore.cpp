@@ -23,9 +23,10 @@
 #define NOMORE_TIP              L"NoMore"
 #define NOMORE_INFOTITLE        L"NoMore"
 #define NOMORE_INFO             L"NoMore is running."
+#define NOMORE_MUTEX            L"NoMore_Mutex"
 
-#define NOMORE_ELAPSE                3 * 1000
-#define NOMORE_ELAPSE_LONG      5 * 60 * 1000
+#define NOMORE_ELAPSE            3 * 1000
+#define NOMORE_ELAPSE_LONG      60 * 1000
 
 #define NOMORE_KEY              VK_LCONTROL
 
@@ -50,28 +51,39 @@ void CALLBACK noMore(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent, DWORD dwTime)
 
         HWND hwnd = NULL;
 
+        LASTINPUTINFO lii = { 0 , };
+        lii.cbSize = sizeof(LASTINPUTINFO);
+
         while (true)
         {
             hwnd = FindWindowExW(NULL, hwnd, L"FFXIVGAME", NULL);
             if (hwnd == NULL)
                 break;
 
-            /*
-            if (hwnd == GetForegroundWindow())
+            lii.dwTime = 0;
+            if (
+                hwnd == GetForegroundWindow() ||
+                (
+                    GetLastInputInfo(&lii) != 0 &&
+                    (GetTickCount64() - lii.dwTime) > NOMORE_ELAPSE_LONG
+                )
+            )
             {
-                continue;
+                PostMessageW(hwnd, WM_KEYDOWN, NOMORE_KEY, 0);
+                Sleep(10);
+                PostMessageW(hwnd, WM_KEYUP, NOMORE_KEY, 0);
             }
-            */
-
-            PostMessageW(hwnd, WM_KEYDOWN, NOMORE_KEY, 0);
-            Sleep(10);
-            PostMessageW(hwnd, WM_KEYUP, NOMORE_KEY, 0);
         };
     }
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int cmdShow)
 {
+    if (CreateMutexW(NULL, FALSE, NOMORE_MUTEX) == NULL && GetLastError() == ERROR_ALREADY_EXISTS)
+    {
+        return 0;
+    }
+
 #ifndef _DEBUG
     if (!checkLatestRelease())
     {
